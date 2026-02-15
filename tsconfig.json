@@ -12,7 +12,11 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "rootDir": ".",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
   "include": ["**/*.ts", "**/*.js", "index.js"],
   "exclude": ["node_modules", "dist"]
