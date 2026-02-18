@@ -12,37 +12,37 @@ export async function getById(id: number) : Promise<User | null> {
     return await UserModel.getById(id);
 }
 
-export async function getByName(usuario: string) : Promise<User | null> {
-    return await UserModel.getByName(usuario);
+export async function getByName(username: string) : Promise<User | null> {
+    return await UserModel.getByName(username);
 }
 
 export async function getByEmail(email: string) : Promise<User | null> {
     return await UserModel.getByEmail(email);
 }
 
-export async function post({ nombre, apellido, usuario, passwordHash = null, empresa, email, idrol,  id_tenant = null }: any) : Promise<User> {
-    return await UserModel.post(nombre, apellido, usuario, passwordHash, empresa, email, idrol,  id_tenant);
+export async function post({ username, first_name, last_name, password = null,  email, id_role,  id_tenant = null }: any) : Promise<User> {
+    return await UserModel.post(username, first_name, last_name, password, email, id_role,  id_tenant);
 }
 
-export async function createUserByAdmin(admin:User, {nombre, apellido, usuario, email, idrol} : Register) {
+export async function createUserByAdmin(admin:User, {username, first_name, last_name, email, id_role} : Register) {
   
-    if(admin.idrol !== 1) {
+    if(admin.id_role !== 1) {
         return { status: 400, message: 'Denegade permissions.' };
     }
 
-    const user = await post({ nombre, apellido, usuario, passwordHash: null, empresa: admin.empresa, email, idrol, id_tenant: admin.id_tenant } );
+    const user = await post({ username, first_name, last_name, passwordHash: null, email, id_role, id_tenant: admin.id_tenant } );
     console.log('Created success user:', user);
     const token = generateToken({
-        idusuario : user.idusuario,
-        usuario   : user.usuario,
-        type    : 'create_password',
+        id        : user.id,
+        username  : user.username,
+        type      : 'create_password',
     }, '24h');
 
     if(!token){
         return { status: 500, message: 'Error generating token.' };
     }
     try {
-        await sendCreatePassword(email, usuario, token);
+        await sendCreatePassword(email, username, token);
         console.log('Create password email sent to:', email);
     } catch (error) {
         console.log('Error sending create password email:', error);
@@ -57,21 +57,21 @@ export async function setPasswordAndActivateUser(token: string, password : strin
         return { status: 400, message: 'Invalid or expired token.' };
     }
     console.log('Decoded token:', decoded);
-    const user = await getById(decoded.idusuario);
+    const user = await getById(decoded.id);
     if (!user) {
         return { status: 400, message: 'User not found.' };
     }
-    if (user.activo === 1) {
+    if (user.active === 1) {
         return { status: 200, message: 'User already activated.' };
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    return await setPasswordAndActivate(decoded.idusuario, passwordHash);
+    return await setPasswordAndActivate(decoded.id, passwordHash);
 }
 
-export async function setRecoveryPassword(idusuario: number, email: string) {
+export async function setRecoveryPassword(id: number, email: string) {
     const token = generateToken({
-        idusuario,
+        id,
         email,
         type    : 'recovery_password',
     }, '24h');
@@ -87,35 +87,35 @@ export async function setRecoveryPassword(idusuario: number, email: string) {
     return { status: 200, message: 'Recovery password email sent successfully.', token };
 }
 
-export async function updatePassword(newPassword: string, token: string) {
+export async function updatePassword(password: string, token: string) {
     const decoded = verifyToken(token);
     if (!decoded || typeof decoded === 'string') {
         return { status: 400, message: 'Invalid or expired token.' };
     }
-    const idusuario = decoded.idusuario;
-    if (!idusuario) {
+    const id = decoded.id;
+    if (!id) {
         return { status: 400, message: 'Invalid token.' };
     }
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    return await UserModel.updatePassword(idusuario, passwordHash);
+    const passwordHash = await bcrypt.hash(password, 10);
+    return await UserModel.updatePassword(id, passwordHash);
 }
 
-export async function remove(idusuario: number) {
-    return await UserModel.deleteById(idusuario);
+export async function remove(id: number) {
+    return await UserModel.deleteById(id);
 }
 
-export async function update({idusuario, id_tenant, usuario = null, nombre = null , apellido = null, email = null, idrol = null }: any): Promise<User | null> {
-    return await UserModel.put(idusuario, id_tenant, usuario, nombre , apellido, email, idrol);
+export async function update({id, username = null, first_name = null, last_name = null,  email = null, id_role = null, id_tenant }: any): Promise<User | null> {
+    return await UserModel.put(id, username, first_name, last_name, email, id_role, id_tenant);
 }
 
 export async function verifyPassword(hash: string, plain: string ) : Promise<boolean> {
     return await bcrypt.compare(plain, hash);
 }
 
-export async function activate(idusuario: number) : Promise<User | null> {
-    return await UserModel.activate(idusuario);
+export async function activate(id: number) : Promise<User | null> {
+    return await UserModel.activate(id);
 }
 
-export async function setPasswordAndActivate(idusuario: number, passwordHash: string) : Promise<User | null> {
-    return await UserModel.setPasswordAndActive(idusuario, passwordHash);
+export async function setPasswordAndActivate(id: number, password: string) : Promise<User | null> {
+    return await UserModel.setPasswordAndActive(id, password);
 }

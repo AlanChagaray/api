@@ -4,7 +4,7 @@ import { HttpResponse } from '@/types/HttpResponse';
 
 export async function login(req: HttpRequest, res: HttpResponse){
   
-  if(!req.body.usuario) return res.status(400).json({ success: false, message: 'User name is requerid.' });
+  if(!req.body.username) return res.status(400).json({ success: false, message: 'User name is requerid.' });
   if(!req.body.password) return res.status(400).json({ success: false, message: 'Password is requerid.' });
 
   try {
@@ -29,7 +29,7 @@ export async function login(req: HttpRequest, res: HttpResponse){
 
 export async function post(req: HttpRequest, res: HttpResponse) {
   try {
-    const result = await AuthService.register(req.body);
+    const result = await AuthService.singUp(req.body);
     return res.status(result.status).json(result);
   } catch (error) {
     console.error(error);

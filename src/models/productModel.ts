@@ -6,8 +6,8 @@ class ProductModel {
       const sql = `
           SELECT p.*, s.name as state, c.name as category
           FROM products as p 
-          INNER JOIN categories c ON c.idcategory = p.idcategory
-          INNER JOIN states s ON s.idstate = p.id_state
+          INNER JOIN products_categories c ON c.id = p.id_category
+          INNER JOIN products_states s ON s.id = p.id_state
           WHERE (p.name ILIKE '%' || $1 || '%' OR $1 IS NULL)
           AND (p.description ILIKE '%' || $2 || '%' OR $2 IS NULL)
           AND (p.id_state = $3 OR $3 IS NULL)
@@ -21,15 +21,15 @@ class ProductModel {
   static async getById(id: number, id_tenant: number) {
     const sql = `SELECT p.*, s.name as state, c.name as category
                 FROM products p
-                INNER JOIN categories c ON c.idcategory = p.idcategory
-                INNER JOIN states s ON s.idstate = p.id_state
-                WHERE p.idproduct = $1 AND p.id_tenant = $2`;
+                INNER JOIN products_categories c ON c.id = p.id_category
+                INNER JOIN products_states s ON s.id = p.id_state
+                WHERE p.id = $1 AND p.id_tenant = $2`;
     const { rows } = await pool.query(sql, [id, id_tenant]);
     return rows[0] || null;
   }
 
   static async remove(id: number, id_tenant: number) {
-    const sql = "UPDATE products SET active = false WHERE idproduct = $1 AND id_tenant = $2 RETURNING *";
+    const sql = "UPDATE products SET active = 0 WHERE id = $1 AND id_tenant = $2 RETURNING *";
     await pool.query(sql, [id, id_tenant]);
     return true;
   }
@@ -48,7 +48,7 @@ class ProductModel {
                   price     = COALESCE($5, price), 
                   id_state  = COALESCE($6, id_state), 
                   id_category = COALESCE($7, id_category)
-                  WHERE idproduct = $1 and id_tenant = $8 RETURNING *`;
+                  WHERE id = $1 and id_tenant = $8 RETURNING *`;
     const {rows} = await pool.query(sql, [id, name, description, cost, price, id_state, id_category, id_tenant]);
     return rows[0];
   }

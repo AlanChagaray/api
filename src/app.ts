@@ -3,6 +3,7 @@ dotenv.config();
 
 import authRoutes from './routes/authRoute';
 import userRoutes from './routes/userRoute';
+import productRoutes from './routes/productRoute';
 import { testConnection } from './infrastructure/database/database';
 import { HttpServer } from './infrastructure/http/httpServer';
 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT;
 
 server.mount('/api/auth', authRoutes.getRouter());
 server.mount('/api/users', userRoutes.getRouter());
+server.mount('/api/products', productRoutes.getRouter());
 
 server.listen(PORT || '3000', () => {
   console.log(`Server is running http://localhost:${PORT}`);

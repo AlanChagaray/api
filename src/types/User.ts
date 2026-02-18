@@ -1,49 +1,42 @@
 export interface User {
-  idusuario       : number;
-  id              : string;
-  nombre          : string;
-  apellido        : string;
-  usuario         : string;
+  id              : number;
+  username        : string;
+  first_name      : string;
+  last_name       : string;
   email           : string;
   password        : string;
-  idrol           : number;
-  rol             : string;
-  activo          : number;
-  empresa         : string;
+  id_role         : number;
+  active          : number;
   id_tenant       : number;
-  fechaAlta       : Date;
-  fechaModificacion: Date;
+  tenant_name     : string;
 }
 
 export interface SearchParams {
   idusuario       ?: number;
   id              ?: string;
-  nombre          ?: string;
-  apellido        ?: string;
-  usuario         ?: string;
+  first_name      ?: string;
+  last_name       ?: string;
+  username        ?: string;
   email           ?: string;
   password        ?: string;
-  rol             ?: string;
-  idrol           ?: number;
-  empresa         ?: string;
+  id_role         ?: number;
   id_tenant       : number;
 }
 
 export interface Login {
-  idusuario: number;
-  usuario  : string;
-  password : string;
-  rol      : string;
-  id_tenant: number;
-  empresa  : string;
+  id        : number;
+  username  : string;
+  password  : string;
+  id_role   : number;
+  id_tenant : number;
 }
 
 export interface Register {
-  nombre    : string;
-  apellido  : string;
-  usuario   : string;
-  email     : string;
-  idrol     : number;
+  username    : string;
+  first_name  : string;
+  last_name   : string;
+  email       : string;
+  id_role     : number;
 }
 
 export type UserList = User[];

@@ -2,86 +2,86 @@ import { pool } from '../config/db';
 
 class UserModel {
 
-  static async search(usuario:string , nombre:string, apellido:string, idrol:number , id_tenant:number) {
+  static async search(username:string , first_name:string, last_name:string, id_role:number , id_tenant:number) {
       const sql = `
-          SELECT u.*, r.descripcion as rol
-          FROM usuarios u 
-          INNER JOIN roles r ON r.idrol = u.idrol
-          WHERE (u.usuario = $1 OR $1 IS NULL)
-          AND (u.nombre = $2 OR $2 IS NULL)
-          AND (u.apellido = $3 OR $3 IS NULL)
-          AND (u.idrol = $4 OR $4 IS NULL)
+          SELECT u.*, r.name as rol
+          FROM users u 
+          INNER JOIN roles r ON r.id = u.id_role
+          WHERE (u.username = $1 OR $1 IS NULL)
+          AND (u.first_name = $2 OR $2 IS NULL)
+          AND (u.last_name = $3 OR $3 IS NULL)
+          AND (u.id_role = $4 OR $4 IS NULL)
           AND u.id_tenant = $5
           `;
-      const { rows } = await pool.query(sql, [usuario, nombre, apellido, idrol, id_tenant]);
+      const { rows } = await pool.query(sql, [username, first_name, last_name, id_role, id_tenant]);
       return rows;
   }
 
-  static async getByName(usuario: string) {
+  static async getByName(username: string) {
     const sql = `
-      SELECT u.idusuario, u.usuario, u.password, u.id_tenant, u.empresa, r.idrol,  r.descripcion as rol
-      FROM usuarios u
-      INNER JOIN roles r on r.idrol = u.idrol 
-      WHERE u.usuario = $1 AND u.activo = 1
+      SELECT u.*,  r.name as role
+      FROM users u
+      INNER JOIN roles r on r.id = u.id_role 
+      WHERE u.username = $1 AND u.active = 1
     `;
-    const { rows } = await pool.query(sql, [usuario]);
+    const { rows } = await pool.query(sql, [username]);
     return rows[0] || null;
   }
 
   static async getById(id: number) {
-    const sql = `SELECT u.usuario, u.password, u.id_tenant, u.empresa,  r.descripcion as rol
-                FROM usuarios u
-                INNER JOIN roles r on r.idrol = u.idrol 
-                WHERE u.idusuario = $1`;
+    const sql = `SELECT u.*,  r.name as role
+                FROM users u
+                INNER JOIN roles r on r.id = u.id_role 
+                WHERE u.id = $1`;
     const { rows } = await pool.query(sql, [id]);
     return rows[0] || null;
   }
 
   static async getByEmail(email: string) {
-    const sql = `SELECT * FROM usuarios u WHERE u.email = $1 AND u.activo = 1`;
+    const sql = `SELECT * FROM users u WHERE u.email = $1 AND u.active = 1`;
     const { rows } = await pool.query(sql, [email]);
     return rows[0] || null;
   }
 
-  static async deleteById(idusuario: number) {
-    const sql = "DELETE FROM usuarios WHERE idusuario = $1 RETURNING *";
-    await pool.query(sql, [idusuario]);
+  static async deleteById(id: number) {
+    const sql = "DELETE FROM users WHERE id = $1 RETURNING *";
+    await pool.query(sql, [id]);
     return true;
   }
 
-  static async activate(idusuario: number) {
-    const sql = "UPDATE usuarios SET activo = 1 WHERE idusuario = $1 RETURNING *";
-    const { rows } = await pool.query(sql, [idusuario]);
+  static async activate(id: number) {
+    const sql = "UPDATE users SET active = 1 WHERE id = $1 RETURNING *";
+    const { rows } = await pool.query(sql, [id]);
     return rows[0] || null;
   }
 
-  static async setPasswordAndActive(idusuario: number, passwordHash: string) {
-    const sql = "UPDATE usuarios SET password = $2, activo = 1 WHERE idusuario = $1 RETURNING *";
-    const { rows } = await pool.query(sql, [idusuario, passwordHash]);
+  static async setPasswordAndActive(id: number, passwordHash: string) {
+    const sql = "UPDATE users SET password = $2, active = 1 WHERE id = $1 RETURNING *";
+    const { rows } = await pool.query(sql, [id, passwordHash]);
     return rows[0] || null;
   }
 
-  static async updatePassword(idusuario: number, passwordHash: string) {
-    const sql = "UPDATE usuarios SET password = $2 WHERE idusuario = $1 RETURNING *";
-    const { rows } = await pool.query(sql, [idusuario, passwordHash]);
+  static async updatePassword(id: number, passwordHash: string) {
+    const sql = "UPDATE users SET password = $2 WHERE id = $1 RETURNING *";
+    const { rows } = await pool.query(sql, [id, passwordHash]);
     return rows[0] || null;
   }
 
-  static async post(nombre: string, apellido: string, usuario: string, password: string, email: string, empresa: string, idrol: number ,id_tenant: number) {
-    const sql = 'INSERT INTO usuarios (nombre, apellido, usuario, password, empresa, email, idrol, id_tenant, activo) VALUES ($1, $2, $3 ,$4 ,$5 , $6, $7, $8, $9) RETURNING *';
-    const {rows} = await pool.query(sql, [nombre, apellido, usuario, password, email, empresa, idrol, id_tenant, 0]);
+  static async post(username: string,first_name: string, last_name: string,  password: string, email: string, id_role: number ,id_tenant: number) {
+    const sql = 'INSERT INTO users (username, first_name, last_name, password, email, id_role, id_tenant, active) VALUES ($1, $2, $3 ,$4 ,$5 , $6, $7, $8) RETURNING *';
+    const {rows} = await pool.query(sql, [username, first_name, last_name, password, email,  id_role, id_tenant, 0]);
     return rows[0];
   }
 
-  static async put(idusuario: number, id_tenant: number, usuario: string, nombre: string, apellido: string, email: string, idrol: number) {
-    const sql = `UPDATE usuarios SET
-        usuario   = COALESCE($3, usuario), 
-        nombre    = COALESCE($4, nombre), 
-        apellido  = COALESCE($5, apellido), 
-        email     = COALESCE($6, email), 
-        idrol     = COALESCE($7, idrol)
-        WHERE idusuario = $1 and id_tenant = $2 RETURNING *`;
-    const {rows} = await pool.query(sql, [idusuario , id_tenant , usuario , nombre, apellido, email, idrol]);
+  static async put(id: number, username: string, first_name: string, last_name: string, email: string, id_role: number, id_tenant: number) {
+    const sql = `UPDATE users SET
+        username   = COALESCE($2, username), 
+        first_name    = COALESCE($3, first_name), 
+        last_name  = COALESCE($4, last_name), 
+        email     = COALESCE($5, email), 
+        id_role     = COALESCE($6, id_role)
+        WHERE id = $1 and id_tenant = $7 RETURNING *`;
+    const {rows} = await pool.query(sql, [id, username, first_name, last_name, email, id_role, id_tenant]);
     return rows[0];
   }
 

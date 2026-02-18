@@ -6,7 +6,7 @@ const router = new HttpRouter();
 
 router.post('/',handleValidation,login);
 
-router.post('/add',handleValidation,post);
+router.post('/singup',handleValidation,post);
 
 router.post('/activate/:token', activate);
 

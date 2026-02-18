@@ -1,4 +1,4 @@
-import * as ProductService from '@/services/productService';
+import * as ProductService from '../services/productService';
 import { HttpRequest } from '@/types/HttpRequest';
 import { HttpResponse } from '@/types/HttpResponse';
 
@@ -55,14 +55,14 @@ export async function remove(req: HttpRequest, res: HttpResponse) {
 }
 
 export async function put(req: HttpRequest, res: HttpResponse) {
-  const { id, name, description, cost, price, id_state, id_category } = req.body;
+  const id = parseInt(req.params.id);
+  const { name, description, cost, price, id_state, id_category } = req.body;
 
   if(!id) {
     return res.status(400).json({ message: 'id is required.' });
   }
 
   let id_tenant = req.user?.id_tenant;
-console.log('body update:', req.body);
   try {
     const response = await ProductService.update({ id, name, description, cost, price, id_state, id_category, id_tenant });
     return res.status(200).json(response);

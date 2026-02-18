@@ -5,5 +5,6 @@ export async function getByName(name: string) {
 }
 
 export async function createTenant(name: string) {
-  return await TenantModel.post(name);
+  const slug = name.toLowerCase().replace(/\s+/g, '-');
+  return await TenantModel.post(name, slug);
 }
